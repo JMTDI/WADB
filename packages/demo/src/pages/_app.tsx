@@ -59,7 +59,7 @@ const ROUTES = [
     },
     {
         url: "/eGateinstall",
-        icon: Icons.Phone,
+        icon: Icons.eGate,
         name: "eGate auto-installer",
     },
     {
