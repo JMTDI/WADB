@@ -58,6 +58,19 @@ import {
 
 const STYLE = {};
 
+const eGateIcon = () => (
+    <img
+        src="/icons/eGate.png"
+        alt="eGate"
+        style={{
+            width: 20,
+            height: 20,
+            objectFit: "contain",
+            verticalAlign: "middle",
+        }}
+    />
+);
+
 export function register() {
     registerIcons({
         icons: {
@@ -129,6 +142,9 @@ export function register() {
                     style={{ fontSize: 20, verticalAlign: "middle" }}
                 />
             ),
+
+            // Custom image icon
+            eGate: <eGateIcon />,
         },
     });
 }
@@ -184,6 +200,7 @@ const Icons = {
     WindowDevTools: "WindowDevTools",
 
     Document20: "Document20",
+    eGate: "eGate",
 };
 
 export default Icons;
