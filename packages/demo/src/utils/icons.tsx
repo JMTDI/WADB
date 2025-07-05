@@ -63,8 +63,8 @@ const EGateIcon = () => (
         src="/Icons/eGate.png"
         alt="eGate"
         style={{
-            width: 20,
-            height: 20,
+            width: 10,
+            height: 10,
             objectFit: "contain",
             verticalAlign: "middle",
         }}
