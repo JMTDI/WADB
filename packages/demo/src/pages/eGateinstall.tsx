@@ -144,7 +144,6 @@ class InstallPageState {
                             })
                         )
                     ),
-                // Fixed: Use grantRuntimePermissions instead of extraArgs
                 { ...this.options, grantRuntimePermissions: true } as any
             );
             runInAction(() => {
