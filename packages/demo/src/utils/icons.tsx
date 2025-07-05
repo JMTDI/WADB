@@ -60,7 +60,7 @@ const STYLE = {};
 
 const eGateIcon = () => (
     <img
-        src="/icons/eGate.png"
+        src="/Icons/eGate.png"
         alt="eGate"
         style={{
             width: 20,
