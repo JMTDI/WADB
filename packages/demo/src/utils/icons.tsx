@@ -58,7 +58,7 @@ import {
 
 const STYLE = {};
 
-const eGateIcon = () => (
+const EGateIcon = () => (
     <img
         src="/Icons/eGate.png"
         alt="eGate"
@@ -144,7 +144,7 @@ export function register() {
             ),
 
             // Custom image icon
-            eGate: <eGateIcon />,
+            eGate: <EGateIcon />,
         },
     });
 }
