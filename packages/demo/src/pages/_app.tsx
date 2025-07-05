@@ -59,7 +59,7 @@ const ROUTES = [
     },
     {
         url: "/eGateinstall",
-        icon: Icons.ArrowClockwise
+        icon: Icons.ArrowClockwise,
         name: "eGate auto-installer",
     },
     {
