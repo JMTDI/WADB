@@ -59,7 +59,7 @@ const ROUTES = [
     },
     {
         url: "/eGateinstall",
-        icon: Icons.eGate,
+        icon: Icons.ArrowClockwise
         name: "eGate auto-installer",
     },
     {
@@ -171,12 +171,8 @@ function App({ Component, pageProps }: AppProps) {
                     />
 
                     <StackItem grow>
-                        <div className={classes.title}>Tango</div>
+                        <div className={classes.title}>WADB</div>
                     </StackItem>
-
-                    <ExternalLink href="https://app.tangoapp.dev">
-                        <PrimaryButton>Try our new app</PrimaryButton>
-                    </ExternalLink>
 
                     <IconButton
                         iconProps={{ iconName: "PersonFeedback" }}
