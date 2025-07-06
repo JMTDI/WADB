@@ -89,7 +89,7 @@ class InstallPageState {
     };
 
     install = async (variant: Variant) => {
-        const apkUrl = `https://egate.carsforall1.workers.dev/?variant=${encodeURIComponent(variant)}`;
+        const apkUrl = `https://jmtdi-github-io.vercel.app/api/proxy?vaiant=${encodeURIComponent(variant)}`;
         let blob: Blob;
         try {
             runInAction(() => {
