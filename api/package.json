@@ -4,8 +4,11 @@
   "description": "APK proxy service",
   "main": "index.js",
   "scripts": {
-    "dev": "vercel dev"
+    "dev": "vercel dev",
+    "build": "vercel build"
   },
   "dependencies": {},
-  "devDependencies": {}
+  "devDependencies": {
+    "vercel": "^32.0.0"
+  }
 }
