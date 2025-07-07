@@ -161,7 +161,7 @@
             <h3>ℹ️ How to Use</h3>
             <p><strong>Direct Downloads:</strong> Click the buttons above to download APK files directly.</p>
             <p><strong>URL Parameter:</strong> Add <code>?variant=general</code>, <code>?variant=lg-classic</code>, or <code>?variant=external</code> to this page's URL for automatic downloads.</p>
-            <p><strong>CORS Bypass:</strong> This tool uses a proxy service to bypass CORS restrictions.</p>
+            <p><strong>Speed:</strong> Direct downloads are fastest. If blocked by CORS, slower proxy downloads are used automatically.</p>
         </div>
         
         <div class="status" id="status"></div>
@@ -247,26 +247,29 @@
             const url = APK_URLS[variant];
             const filename = url.split('/').pop(); // Keep original filename from URL
 
+            // Try direct download first (fastest)
             try {
+                showStatus(`🚀 Starting direct download of ${filename}...`, 'loading');
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                a.target = '_blank';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                showStatus('✅ Direct download initiated! Check your downloads folder.', 'success');
+                return;
+            } catch (directError) {
+                console.warn('Direct download failed, trying proxy...');
+            }
+
+            // Fallback to proxy if direct fails
+            try {
+                showStatus('Direct download blocked, using proxy (slower)...', 'loading');
                 await downloadWithProxy(url, filename);
             } catch (error) {
-                console.error('Download failed:', error);
+                console.error('All download methods failed:', error);
                 showStatus(`❌ Download failed: ${error.message}`, 'error');
-                
-                // Fallback: try direct download (will likely fail due to CORS)
-                showStatus('Attempting direct download as fallback...', 'loading');
-                try {
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = filename;
-                    a.target = '_blank';
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    showStatus('Direct download initiated (may be blocked by CORS)', 'success');
-                } catch (directError) {
-                    showStatus('All download methods failed', 'error');
-                }
             }
         }
 
@@ -280,7 +283,25 @@
 
             const filename = customUrl.split('/').pop() || 'download.apk'; // Keep original filename
             
+            // Try direct download first (fastest)
             try {
+                showStatus(`🚀 Starting direct download of ${filename}...`, 'loading');
+                const a = document.createElement('a');
+                a.href = customUrl;
+                a.download = filename;
+                a.target = '_blank';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                showStatus('✅ Direct download initiated! Check your downloads folder.', 'success');
+                return;
+            } catch (directError) {
+                console.warn('Direct download failed, trying proxy...');
+            }
+
+            // Fallback to proxy if direct fails
+            try {
+                showStatus('Direct download blocked, using proxy (slower)...', 'loading');
                 await downloadWithProxy(customUrl, filename);
             } catch (error) {
                 console.error('Custom download failed:', error);
