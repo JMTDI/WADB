@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>eGate APK Downloader</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .download-section {
+            margin: 30px 0;
+        }
+        
+        .download-button {
+            display: inline-block;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            margin: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .download-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .download-button:active {
+            transform: translateY(0);
+        }
+        
+        .url-section {
+            margin: 30px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .url-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1em;
+            margin: 10px 0;
+        }
+        
+        .url-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: bold;
+            text-align: center;
+            display: none;
+        }
+        
+        .status.success {
+            background: rgba(46, 204, 113, 0.2);
+            border: 1px solid rgba(46, 204, 113, 0.5);
+            color: #2ecc71;
+        }
+        
+        .status.error {
+            background: rgba(231, 76, 60, 0.2);
+            border: 1px solid rgba(231, 76, 60, 0.5);
+            color: #e74c3c;
+        }
+        
+        .status.loading {
+            background: rgba(52, 152, 219, 0.2);
+            border: 1px solid rgba(52, 152, 219, 0.5);
+            color: #3498db;
+        }
+        
+        .variant-info {
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .code-block {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 eGate APK Downloader</h1>
+        
+        <div class="download-section">
+            <h2>📱 Available Variants</h2>
+            <button class="download-button" onclick="downloadVariant('general')">
+                📦 General Release
+            </button>
+            <button class="download-button" onclick="downloadVariant('lg-classic')">
+                📺 LG Classic
+            </button>
+            <button class="download-button" onclick="downloadVariant('external')">
+                ♿ External Accessibility
+            </button>
+        </div>
+        
+        <div class="url-section">
+            <h2>🔗 URL Download</h2>
+            <p>Use this format to download specific variants:</p>
+            <div class="code-block">
+                <span id="current-url">https://your-github-pages-url.github.io/page.html?variant=general</span>
+            </div>
+            <input type="text" class="url-input" id="custom-url" placeholder="Enter custom download URL or use ?variant=general|lg-classic|external">
+            <button class="download-button" onclick="downloadCustomUrl()">
+                🌐 Download from URL
+            </button>
+        </div>
+        
+        <div class="variant-info">
+            <h3>ℹ️ How to Use</h3>
+            <p><strong>Direct Downloads:</strong> Click the buttons above to download APK files directly.</p>
+            <p><strong>URL Parameter:</strong> Add <code>?variant=general</code>, <code>?variant=lg-classic</code>, or <code>?variant=external</code> to this page's URL for automatic downloads.</p>
+            <p><strong>CORS Bypass:</strong> This tool uses a proxy service to bypass CORS restrictions.</p>
+        </div>
+        
+        <div class="status" id="status"></div>
+    </div>
+
+    <script>
+        const APK_URLS = {
+            "general": "https://github.com/offlinesoftwaresolutions/eGate/releases/latest/download/app-general-release.apk",
+            "lg-classic": "https://github.com/offlinesoftwaresolutions/eGate/releases/latest/download/app-lgclassic-release.apk",
+            "external": "https://github.com/offlinesoftwaresolutions/eGate/releases/latest/download/app-external_accessibility-release.apk"
+        };
+
+        // CORS proxy services (multiple fallbacks)
+        const CORS_PROXIES = [
+            'https://api.allorigins.win/raw?url=',
+            'https://cors-anywhere.herokuapp.com/',
+            'https://api.codetabs.com/v1/proxy?quest='
+        ];
+
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
+            statusDiv.style.display = 'block';
+            
+            if (type !== 'loading') {
+                setTimeout(() => {
+                    statusDiv.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        async function downloadWithProxy(url, filename, proxyIndex = 0) {
+            if (proxyIndex >= CORS_PROXIES.length) {
+                throw new Error('All proxy services failed');
+            }
+
+            const proxy = CORS_PROXIES[proxyIndex];
+            const proxiedUrl = proxy + encodeURIComponent(url);
+
+            try {
+                showStatus(`Downloading ${filename} via proxy ${proxyIndex + 1}...`, 'loading');
+                
+                const response = await fetch(proxiedUrl);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const blob = await response.blob();
+                
+                // Create download link
+                const downloadUrl = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = downloadUrl;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(downloadUrl);
+                
+                showStatus(`✅ ${filename} downloaded successfully!`, 'success');
+                return true;
+                
+            } catch (error) {
+                console.warn(`Proxy ${proxyIndex + 1} failed:`, error);
+                
+                // Try next proxy
+                if (proxyIndex < CORS_PROXIES.length - 1) {
+                    return await downloadWithProxy(url, filename, proxyIndex + 1);
+                } else {
+                    throw error;
+                }
+            }
+        }
+
+        async function downloadVariant(variant) {
+            if (!APK_URLS[variant]) {
+                showStatus(`❌ Unknown variant: ${variant}`, 'error');
+                return;
+            }
+
+            const url = APK_URLS[variant];
+            const filename = `eGate-${variant}-release.apk`;
+
+            try {
+                await downloadWithProxy(url, filename);
+            } catch (error) {
+                console.error('Download failed:', error);
+                showStatus(`❌ Download failed: ${error.message}`, 'error');
+                
+                // Fallback: try direct download (will likely fail due to CORS)
+                showStatus('Attempting direct download as fallback...', 'loading');
+                try {
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = filename;
+                    a.target = '_blank';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    showStatus('Direct download initiated (may be blocked by CORS)', 'success');
+                } catch (directError) {
+                    showStatus('All download methods failed', 'error');
+                }
+            }
+        }
+
+        async function downloadCustomUrl() {
+            const customUrl = document.getElementById('custom-url').value.trim();
+            
+            if (!customUrl) {
+                showStatus('❌ Please enter a URL', 'error');
+                return;
+            }
+
+            const filename = customUrl.split('/').pop() || 'download.apk';
+            
+            try {
+                await downloadWithProxy(customUrl, filename);
+            } catch (error) {
+                console.error('Custom download failed:', error);
+                showStatus(`❌ Custom download failed: ${error.message}`, 'error');
+            }
+        }
+
+        // Check for URL parameter on page load
+        function checkUrlParameter() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const variant = urlParams.get('variant');
+            
+            if (variant && APK_URLS[variant]) {
+                showStatus(`Auto-downloading ${variant} variant...`, 'loading');
+                downloadVariant(variant);
+            }
+            
+            // Update the example URL
+            const currentUrl = window.location.origin + window.location.pathname;
+            document.getElementById('current-url').textContent = currentUrl + '?variant=general';
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', checkUrlParameter);
+    </script>
+</body>
+</html>
