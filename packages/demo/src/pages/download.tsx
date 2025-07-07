@@ -31,7 +31,7 @@ const urls = {
   "external": "https://github.com/offlinesoftwaresolutions/eGate/releases/latest/download/app-external_accessibility-release.apk"
 };
 
-export async function getServerSideProps({ req, res, query }) {
+export async function getServerSideProps({ req, res, query }: { req: any, res: any, query: any }) {
   if (req.method === 'GET' && query.variant) {
     const { variant } = query;
     
