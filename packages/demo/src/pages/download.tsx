@@ -95,7 +95,7 @@ const APKDownloader = () => {
     }
   };
 
-  const downloadAPK = (variant) => {
+  const downloadAPK = (variant: string) => {
     setDownloading(variant);
     window.location.href = `?variant=${variant}`;
   };
