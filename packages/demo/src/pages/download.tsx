@@ -1,6 +1,29 @@
 import React, { useState } from 'react';
-import { Download, Smartphone, Shield, ExternalLink } from 'lucide-react';
 import { NextApiRequest, NextApiResponse } from 'next';
+
+const DownloadIcon = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+  </svg>
+);
+
+const SmartphoneIcon = () => (
+  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a1 1 0 001-1V4a1 1 0 00-1-1H8a1 1 0 00-1 1v16a1 1 0 001 1z" />
+  </svg>
+);
+
+const ShieldIcon = () => (
+  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+  </svg>
+);
+
+const ExternalLinkIcon = () => (
+  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+  </svg>
+);
 
 const urls = {
   "general": "https://github.com/offlinesoftwaresolutions/eGate/releases/latest/download/app-general-release.apk",
@@ -55,19 +78,19 @@ const APKDownloader = () => {
     general: {
       name: 'General Release',
       description: 'Standard version for most devices',
-      icon: <Smartphone className="w-6 h-6" />,
+      icon: <SmartphoneIcon />,
       color: 'bg-blue-500 hover:bg-blue-600'
     },
     'lg-classic': {
       name: 'LG Classic',
       description: 'Optimized for LG Classic devices',
-      icon: <Shield className="w-6 h-6" />,
+      icon: <ShieldIcon />,
       color: 'bg-purple-500 hover:bg-purple-600'
     },
     external: {
       name: 'External Accessibility',
       description: 'Enhanced accessibility features',
-      icon: <ExternalLink className="w-6 h-6" />,
+      icon: <ExternalLinkIcon />,
       color: 'bg-green-500 hover:bg-green-600'
     }
   };
@@ -118,7 +141,7 @@ const APKDownloader = () => {
                   </>
                 ) : (
                   <>
-                    <Download className="w-5 h-5" />
+                    <DownloadIcon />
                     <span>Download APK</span>
                   </>
                 )}
