@@ -42,7 +42,7 @@ export async function getServerSideProps({ req, res, query }: { req: any, res: a
     }
     
     try {
-      const response = await fetch(urls[variant], {
+      const response = await fetch(urls[variant as keyof typeof urls], {
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
         },
