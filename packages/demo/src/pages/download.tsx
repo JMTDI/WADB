@@ -131,7 +131,7 @@ const APKDownloader = () => {
           <div className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/10">
             <h4 className="text-lg font-semibold text-white mb-2">Installation Note</h4>
             <p className="text-gray-300 text-sm">
-              You may need to enable "Install from unknown sources" in your device settings to install the APK.
+              You may need to enable &quot;Install from unknown sources&quot; in your device settings to install the APK.
             </p>
           </div>
         </div>
