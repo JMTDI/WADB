@@ -245,7 +245,7 @@
             }
 
             const url = APK_URLS[variant];
-            const filename = url.split('/').pop(); // Keep original filename from URL
+            const filename = `eGate-${variant}-release.apk`;
 
             try {
                 await downloadWithProxy(url, filename);
@@ -278,7 +278,7 @@
                 return;
             }
 
-            const filename = customUrl.split('/').pop() || 'download.apk'; // Keep original filename
+            const filename = customUrl.split('/').pop() || 'download.apk';
             
             try {
                 await downloadWithProxy(customUrl, filename);
