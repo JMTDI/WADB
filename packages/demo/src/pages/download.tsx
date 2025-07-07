@@ -10,12 +10,12 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const v = searchParams.get('variant');
   
-  if (!v || !urls[v]) {
+  if (!v || !(v in urls)) {
     return new NextResponse('bad variant', { status: 400 });
   }
   
   try {
-    const res = await fetch(urls[v], {
+    const res = await fetch(urls[v as keyof typeof urls], {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
       },
