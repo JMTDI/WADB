@@ -72,7 +72,7 @@ export async function getServerSideProps({ req, res, query }: { req: any, res: a
 }
 
 const APKDownloader = () => {
-  const [downloading, setDownloading] = useState(null);
+  const [downloading, setDownloading] = useState<string | null>(null);
 
   const variants = {
     general: {
