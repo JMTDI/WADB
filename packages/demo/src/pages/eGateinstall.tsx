@@ -95,19 +95,85 @@ class InstallPageState {
     };
 
     install = async (variant: Variant) => {
-        const apkUrl = variants[variant];
+        const directUrl = variants[variant];
         let blob: Blob;
+        
         try {
             runInAction(() => {
                 this.progress = { filename: variantAssetMap[variant], stage: Stage.Downloading, value: 0 };
                 this.log = `Downloading "${variant}" variant...\n`;
                 this.installing = true;
             });
-            const response = await fetch(apkUrl, { mode: "no-cors" });
-            if (!response.ok) {
-                throw new Error(`Failed to download APK: ${response.statusText}`);
+            
+            // Try multiple CORS proxy services in order
+            const corsProxies = [
+                'https://api.allorigins.win/raw?url=',
+                'https://cors-anywhere.herokuapp.com/',
+                'https://thingproxy.freeboard.io/fetch/',
+                'https://api.codetabs.com/v1/proxy?quest='
+            ];
+            
+            let response: Response | null = null;
+            let lastError: Error | null = null;
+            
+            // Try direct download first (might work in some environments)
+            try {
+                response = await fetch(directUrl);
+                if (response.ok) {
+                    runInAction(() => {
+                        this.log += `Direct download successful\n`;
+                    });
+                } else {
+                    throw new Error(`Direct download failed: ${response.status}`);
+                }
+            } catch (directError) {
+                runInAction(() => {
+                    this.log += `Direct download failed, trying CORS proxies...\n`;
+                });
+                
+                // Try each CORS proxy
+                for (const proxy of corsProxies) {
+                    try {
+                        const proxyUrl = proxy + encodeURIComponent(directUrl);
+                        runInAction(() => {
+                            this.log += `Trying proxy: ${proxy}\n`;
+                        });
+                        
+                        response = await fetch(proxyUrl, {
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                            }
+                        });
+                        
+                        if (response.ok) {
+                            runInAction(() => {
+                                this.log += `Proxy successful: ${proxy}\n`;
+                            });
+                            break;
+                        } else {
+                            throw new Error(`Proxy failed: ${response.status}`);
+                        }
+                    } catch (proxyError) {
+                        lastError = proxyError as Error;
+                        runInAction(() => {
+                            this.log += `Proxy failed: ${proxy} - ${lastError?.message}\n`;
+                        });
+                        response = null;
+                    }
+                }
             }
+            
+            if (!response || !response.ok) {
+                throw new Error(`All download methods failed. Last error: ${lastError?.message}`);
+            }
+            
             blob = await response.blob();
+            
+            if (blob.size === 0) {
+                throw new Error("Downloaded file is empty");
+            }
+            
         } catch (error: any) {
             runInAction(() => {
                 this.log += `Download error for variant "${variant}": ${error.message}\n`;
