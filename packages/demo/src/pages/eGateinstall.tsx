@@ -95,20 +95,22 @@ class InstallPageState {
         }
     };
 
-    // New method to fetch APK with progress tracking
+    // Fetch APK via proxy API with progress tracking
     private fetchApkWithProgress = async (variant: Variant): Promise<Blob> => {
-        const apkUrl = apkUrls[variant];
-        
         try {
-            const response = await fetch(apkUrl, { 
-                mode: "cors",
+            // First try the proxy API approach
+            const proxyUrl = `/api/proxy?variant=${encodeURIComponent(variant)}`;
+            
+            const response = await fetch(proxyUrl, { 
+                method: 'GET',
                 headers: {
                     'Accept': 'application/vnd.android.package-archive, application/octet-stream, */*'
                 }
             });
             
             if (!response.ok) {
-                throw new Error(`Failed to fetch APK: ${response.status} ${response.statusText}`);
+                // If proxy fails, try direct GitHub download with no-cors mode
+                return await this.fetchDirectWithFallback(variant);
             }
 
             const contentLength = response.headers.get('Content-Length');
@@ -152,7 +154,50 @@ class InstallPageState {
 
             return new Blob([result], { type: 'application/vnd.android.package-archive' });
         } catch (error: any) {
-            throw new Error(`Download failed: ${error.message}`);
+            // If proxy fails, try direct download as fallback
+            return await this.fetchDirectWithFallback(variant);
+        }
+    };
+
+    // Fallback method for direct download
+    private fetchDirectWithFallback = async (variant: Variant): Promise<Blob> => {
+        const apkUrl = apkUrls[variant];
+        
+        try {
+            // Try with no-cors mode first
+            const response = await fetch(apkUrl, { 
+                mode: "no-cors",
+                cache: "no-cache"
+            });
+            
+            // With no-cors, we can't check response.ok, so we'll get the blob directly
+            const blob = await response.blob();
+            
+            // If the blob is too small, it might be an error page
+            if (blob.size < 1024 * 1024) { // Less than 1MB is suspicious for an APK
+                throw new Error('Downloaded file is too small - may be an error page');
+            }
+            
+            return blob;
+        } catch (error: any) {
+            // Final fallback - try CORS with different headers
+            try {
+                const response = await fetch(apkUrl, { 
+                    mode: "cors",
+                    headers: {
+                        'Accept': '*/*',
+                        'Origin': window.location.origin
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                return await response.blob();
+            } catch (corsError: any) {
+                throw new Error(`All download methods failed. Last error: ${corsError.message}`);
+            }
         }
     };
 
