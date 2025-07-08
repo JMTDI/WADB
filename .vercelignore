@@ -1,0 +1,5 @@
+# Exclude everything first
+*
+
+# Then include only what you want to deploy
+api/
