@@ -54,47 +54,36 @@ class InstallPageState {
         });
     }
 
-    // Advanced CORS bypass with simulated server response
-    private createCorsProxyResponse = async (url: string): Promise<Response> => {
-        try {
-            // Method 1: Use a data URL approach to simulate CORS bypass
-            const response = await fetch(url, {
-                method: 'GET',
-                mode: 'cors',
-                headers: {
-                    'Origin': window.location.origin,
-                    'Access-Control-Request-Method': 'GET',
-                    'Access-Control-Request-Headers': 'Content-Type',
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-                },
-            });
-
-            // Create a new response with CORS headers manually added
-            const responseHeaders = new Headers(response.headers);
-            responseHeaders.set('Access-Control-Allow-Origin', '*');
-            responseHeaders.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-            responseHeaders.set('Access-Control-Allow-Headers', 'Content-Type');
-            
-            const blob = await response.blob();
-            return new Response(blob, {
-                status: response.status,
-                statusText: response.statusText,
-                headers: responseHeaders,
-            });
-        } catch (error: any) {
-            throw new Error(`CORS bypass failed: ${error.message}`);
-        }
-    };
-
-    // Client-side CORS bypass approaches
+    // More robust CORS bypass with multiple working proxies
     private fetchWithCorsProxy = async (url: string): Promise<Response> => {
-        // Approach 1: Try the simulated CORS response first
-        try {
-            return await this.createCorsProxyResponse(url);
-        } catch (error) {
-            // Approach 2: Try direct fetch with no-cors mode
-            try {
-                const response = await fetch(url, {
+        const proxies = [
+            // Proxy 1: AllOrigins (most reliable)
+            async (targetUrl: string) => {
+                const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
+                const response = await fetch(proxyUrl);
+                if (!response.ok) throw new Error(`AllOrigins proxy failed: ${response.status}`);
+                return response;
+            },
+            
+            // Proxy 2: Cors.sh
+            async (targetUrl: string) => {
+                const proxyUrl = `https://cors.sh/${targetUrl}`;
+                const response = await fetch(proxyUrl);
+                if (!response.ok) throw new Error(`Cors.sh proxy failed: ${response.status}`);
+                return response;
+            },
+            
+            // Proxy 3: Proxy-cors
+            async (targetUrl: string) => {
+                const proxyUrl = `https://proxy-cors.vercel.app/api/proxy?url=${encodeURIComponent(targetUrl)}`;
+                const response = await fetch(proxyUrl);
+                if (!response.ok) throw new Error(`Proxy-cors failed: ${response.status}`);
+                return response;
+            },
+            
+            // Proxy 4: No-cors mode (fallback)
+            async (targetUrl: string) => {
+                const response = await fetch(targetUrl, {
                     method: 'GET',
                     mode: 'no-cors',
                     headers: {
@@ -102,33 +91,50 @@ class InstallPageState {
                     },
                 });
                 return response;
-            } catch (noCorsError) {
-                // Approach 3: Try using a public CORS proxy
-                const proxyUrl = `https://cors-anywhere.herokuapp.com/${url}`;
-                try {
-                    const response = await fetch(proxyUrl, {
-                        method: 'GET',
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest',
-                            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-                        },
+            },
+            
+            // Proxy 5: Direct fetch (last resort)
+            async (targetUrl: string) => {
+                const response = await fetch(targetUrl, {
+                    method: 'GET',
+                    headers: {
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                        'Accept': 'application/vnd.android.package-archive,*/*',
+                        'Cache-Control': 'no-cache',
+                    },
+                });
+                return response;
+            }
+        ];
+
+        let lastError: Error | null = null;
+        
+        for (let i = 0; i < proxies.length; i++) {
+            try {
+                runInAction(() => {
+                    this.log += `Trying proxy method ${i + 1}...\n`;
+                });
+                
+                const response = await proxies[i](url);
+                
+                if (response.ok || response.type === 'opaque') {
+                    runInAction(() => {
+                        this.log += `Proxy method ${i + 1} succeeded!\n`;
                     });
                     return response;
-                } catch (proxyError) {
-                    // Approach 4: Direct fetch with manual CORS headers (won't work but shows the concept)
-                    const directResponse = await fetch(url, {
-                        method: 'GET',
-                        headers: {
-                            'Access-Control-Allow-Origin': '*',
-                            'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-                            'Access-Control-Allow-Headers': 'Content-Type',
-                            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-                        },
-                    });
-                    return directResponse;
                 }
+                
+                throw new Error(`Response not ok: ${response.status}`);
+            } catch (error: any) {
+                lastError = error;
+                runInAction(() => {
+                    this.log += `Proxy method ${i + 1} failed: ${error.message}\n`;
+                });
+                continue;
             }
         }
+        
+        throw new Error(`All proxy methods failed. Last error: ${lastError?.message}`);
     };
 
     runCommand = async (cmd: string): Promise<string> => {
@@ -177,20 +183,47 @@ class InstallPageState {
         try {
             runInAction(() => {
                 this.progress = { filename: variantAssetMap[variant], stage: Stage.Downloading, value: 0 };
-                this.log = `Downloading "${variant}" variant from GitHub (with CORS bypass)...\n`;
+                this.log = `Starting download of "${variant}" variant from GitHub...\n`;
+                this.log += `Target URL: ${apkUrl}\n`;
                 this.installing = true;
             });
             
-            // Use the integrated CORS proxy
+            // Use the robust CORS proxy with multiple fallbacks
             const response = await this.fetchWithCorsProxy(apkUrl);
             
-            if (!response.ok) {
-                throw new Error(`Failed to download APK: ${response.statusText}`);
+            // Handle opaque responses (from no-cors mode)
+            if (response.type === 'opaque') {
+                runInAction(() => {
+                    this.log += `Received opaque response (no-cors mode). Attempting to process...\n`;
+                });
+                blob = await response.blob();
+            } else {
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const contentLength = response.headers.get('content-length');
+                if (contentLength) {
+                    runInAction(() => {
+                        this.log += `Content length: ${(parseInt(contentLength) / 1024 / 1024).toFixed(2)} MB\n`;
+                    });
+                }
+                
+                blob = await response.blob();
             }
-            blob = await response.blob();
+            
+            if (!blob || blob.size === 0) {
+                throw new Error('Downloaded file is empty or invalid');
+            }
+            
+            runInAction(() => {
+                this.log += `Download completed! File size: ${(blob.size / 1024 / 1024).toFixed(2)} MB\n`;
+            });
+            
         } catch (error: any) {
             runInAction(() => {
                 this.log += `Download error for variant "${variant}": ${error.message}\n`;
+                this.log += `This might be due to CORS restrictions or network issues.\n`;
                 this.installing = false;
             });
             return;
