@@ -1,5 +1,14 @@
-# Exclude everything first
-*
+# Exclude directories
+.github/
+.vscode/
+packages/
 
-# Then include only what you want to deploy
-api/
+# Exclude config files
+.gitignore
+.prettierrc.yaml
+pnpm-lock.yaml
+pnpm-workspace.yaml
+
+# Exclude documentation and license
+LICENSE
+README.md
