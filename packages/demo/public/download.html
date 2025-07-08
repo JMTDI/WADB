@@ -159,9 +159,9 @@
         
         <div class="variant-info">
             <h3>ℹ️ How to Use</h3>
-            <p><strong>Direct Downloads:</strong> Click the buttons above to download APK files directly.</p>
+            <p><strong>CORS Proxy Downloads:</strong> All downloads use CORS proxies to bypass restrictions.</p>
             <p><strong>URL Parameter:</strong> Add <code>?variant=general</code>, <code>?variant=lg-classic</code>, or <code>?variant=external</code> to this page's URL for automatic downloads.</p>
-            <p><strong>Speed:</strong> Direct downloads are fastest. If blocked by CORS, slower proxy downloads are used automatically.</p>
+            <p><strong>Note:</strong> Downloads may be slower due to proxy usage, but will work even with strict CORS policies.</p>
         </div>
         
         <div class="status" id="status"></div>
@@ -174,11 +174,12 @@
             "external": "https://github.com/offlinesoftwaresolutions/eGate/releases/latest/download/app-external_accessibility-release.apk"
         };
 
-        // CORS proxy services (multiple fallbacks)
         const CORS_PROXIES = [
             'https://api.allorigins.win/raw?url=',
             'https://cors-anywhere.herokuapp.com/',
-            'https://api.codetabs.com/v1/proxy?quest='
+            'https://api.codetabs.com/v1/proxy?quest=',
+            'https://thingproxy.freeboard.io/fetch/',
+            'https://cors.bridged.cc/'
         ];
 
         function showStatus(message, type) {
@@ -203,7 +204,7 @@
             const proxiedUrl = proxy + encodeURIComponent(url);
 
             try {
-                showStatus(`Downloading ${filename} via proxy ${proxyIndex + 1}...`, 'loading');
+                showStatus(`Downloading ${filename} via proxy ${proxyIndex + 1}/${CORS_PROXIES.length}...`, 'loading');
                 
                 const response = await fetch(proxiedUrl);
                 
@@ -213,7 +214,6 @@
 
                 const blob = await response.blob();
                 
-                // Create download link
                 const downloadUrl = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = downloadUrl;
@@ -223,13 +223,12 @@
                 document.body.removeChild(a);
                 window.URL.revokeObjectURL(downloadUrl);
                 
-                showStatus(`✅ ${filename} downloaded successfully!`, 'success');
+                showStatus(`✅ ${filename} downloaded successfully via proxy ${proxyIndex + 1}!`, 'success');
                 return true;
                 
             } catch (error) {
                 console.warn(`Proxy ${proxyIndex + 1} failed:`, error);
                 
-                // Try next proxy
                 if (proxyIndex < CORS_PROXIES.length - 1) {
                     return await downloadWithProxy(url, filename, proxyIndex + 1);
                 } else {
@@ -245,30 +244,12 @@
             }
 
             const url = APK_URLS[variant];
-            const filename = url.split('/').pop(); // Keep original filename from URL
+            const filename = url.split('/').pop();
 
-            // Try direct download first (fastest)
             try {
-                showStatus(`🚀 Starting direct download of ${filename}...`, 'loading');
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = filename;
-                a.target = '_blank';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                showStatus('✅ Direct download initiated! Check your downloads folder.', 'success');
-                return;
-            } catch (directError) {
-                console.warn('Direct download failed, trying proxy...');
-            }
-
-            // Fallback to proxy if direct fails
-            try {
-                showStatus('Direct download blocked, using proxy (slower)...', 'loading');
                 await downloadWithProxy(url, filename);
             } catch (error) {
-                console.error('All download methods failed:', error);
+                console.error('All proxy downloads failed:', error);
                 showStatus(`❌ Download failed: ${error.message}`, 'error');
             }
         }
@@ -281,35 +262,16 @@
                 return;
             }
 
-            const filename = customUrl.split('/').pop() || 'download.apk'; // Keep original filename
+            const filename = customUrl.split('/').pop() || 'download.apk';
             
-            // Try direct download first (fastest)
             try {
-                showStatus(`🚀 Starting direct download of ${filename}...`, 'loading');
-                const a = document.createElement('a');
-                a.href = customUrl;
-                a.download = filename;
-                a.target = '_blank';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                showStatus('✅ Direct download initiated! Check your downloads folder.', 'success');
-                return;
-            } catch (directError) {
-                console.warn('Direct download failed, trying proxy...');
-            }
-
-            // Fallback to proxy if direct fails
-            try {
-                showStatus('Direct download blocked, using proxy (slower)...', 'loading');
                 await downloadWithProxy(customUrl, filename);
             } catch (error) {
-                console.error('Custom download failed:', error);
+                console.error('Custom proxy download failed:', error);
                 showStatus(`❌ Custom download failed: ${error.message}`, 'error');
             }
         }
 
-        // Check for URL parameter on page load
         function checkUrlParameter() {
             const urlParams = new URLSearchParams(window.location.search);
             const variant = urlParams.get('variant');
@@ -319,12 +281,10 @@
                 downloadVariant(variant);
             }
             
-            // Update the example URL
             const currentUrl = window.location.origin + window.location.pathname;
             document.getElementById('current-url').textContent = currentUrl + '?variant=general';
         }
 
-        // Initialize
         document.addEventListener('DOMContentLoaded', checkUrlParameter);
     </script>
 </body>
