@@ -173,6 +173,8 @@
             "lg-classic": "https://github.com/offlinesoftwaresolutions/eGate/releases/latest/download/app-lgclassic-release.apk",
             "external": "https://github.com/offlinesoftwaresolutions/eGate/releases/latest/download/app-external_accessibility-release.apk"
         };
+
+        // CORS proxy services (multiple fallbacks)
         const CORS_PROXIES = [
             'https://api.allorigins.win/raw?url=',
             'https://cors-anywhere.herokuapp.com/',
@@ -210,6 +212,8 @@
                 }
 
                 const blob = await response.blob();
+                
+                // Create download link
                 const downloadUrl = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = downloadUrl;
@@ -225,6 +229,7 @@
             } catch (error) {
                 console.warn(`Proxy ${proxyIndex + 1} failed:`, error);
                 
+                // Try next proxy
                 if (proxyIndex < CORS_PROXIES.length - 1) {
                     return await downloadWithProxy(url, filename, proxyIndex + 1);
                 } else {
@@ -240,7 +245,9 @@
             }
 
             const url = APK_URLS[variant];
-            const filename = url.split('/').pop();
+            const filename = url.split('/').pop(); // Keep original filename from URL
+
+            // Try direct download first (fastest)
             try {
                 showStatus(`🚀 Starting direct download of ${filename}...`, 'loading');
                 const a = document.createElement('a');
@@ -255,6 +262,8 @@
             } catch (directError) {
                 console.warn('Direct download failed, trying proxy...');
             }
+
+            // Fallback to proxy if direct fails
             try {
                 showStatus('Direct download blocked, using proxy (slower)...', 'loading');
                 await downloadWithProxy(url, filename);
@@ -272,7 +281,9 @@
                 return;
             }
 
-            const filename = customUrl.split('/').pop() || 'download.apk';
+            const filename = customUrl.split('/').pop() || 'download.apk'; // Keep original filename
+            
+            // Try direct download first (fastest)
             try {
                 showStatus(`🚀 Starting direct download of ${filename}...`, 'loading');
                 const a = document.createElement('a');
@@ -287,6 +298,8 @@
             } catch (directError) {
                 console.warn('Direct download failed, trying proxy...');
             }
+
+            // Fallback to proxy if direct fails
             try {
                 showStatus('Direct download blocked, using proxy (slower)...', 'loading');
                 await downloadWithProxy(customUrl, filename);
@@ -295,6 +308,8 @@
                 showStatus(`❌ Custom download failed: ${error.message}`, 'error');
             }
         }
+
+        // Check for URL parameter on page load
         function checkUrlParameter() {
             const urlParams = new URLSearchParams(window.location.search);
             const variant = urlParams.get('variant');
@@ -304,9 +319,12 @@
                 downloadVariant(variant);
             }
             
+            // Update the example URL
             const currentUrl = window.location.origin + window.location.pathname;
             document.getElementById('current-url').textContent = currentUrl + '?variant=general';
         }
+
+        // Initialize
         document.addEventListener('DOMContentLoaded', checkUrlParameter);
     </script>
 </body>
