@@ -89,7 +89,7 @@ class InstallPageState {
     };
 
     install = async (variant: Variant) => {
-        const apkUrl = `/download.html?variant=${encodeURIComponent(variant)}`;
+        const apkUrl = `https://wadb-demo.vercel.app/api/proxy?variant=${encodeURIComponent(variant)}`;
         let blob: Blob;
         try {
             runInAction(() => {
