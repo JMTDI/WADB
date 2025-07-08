@@ -24,6 +24,12 @@ interface Progress {
 
 type Variant = "general" | "lg-classic" | "external";
 
+const variants = {
+    "general": "https://github.com/offlinesoftwaresolutions/eGate/releases/latest/download/app-general-release.apk",
+    "lg-classic": "https://github.com/offlinesoftwaresolutions/eGate/releases/latest/download/app-lgclassic-release.apk",
+    "external": "https://github.com/offlinesoftwaresolutions/eGate/releases/latest/download/app-external_accessibility-release.apk"
+};
+
 const variantAssetMap: Record<Variant, string> = {
     general: "app-general-release.apk",
     "lg-classic": "app-lgclassic-release.apk",
@@ -89,7 +95,7 @@ class InstallPageState {
     };
 
     install = async (variant: Variant) => {
-        const apkUrl = `https://wadb-demo.vercel.app/api/proxy?variant=${encodeURIComponent(variant)}`;
+        const apkUrl = variants[variant];
         let blob: Blob;
         try {
             runInAction(() => {
@@ -97,7 +103,7 @@ class InstallPageState {
                 this.log = `Downloading "${variant}" variant...\n`;
                 this.installing = true;
             });
-            const response = await fetch(apkUrl, { mode: "cors" });
+            const response = await fetch(apkUrl, { mode: "no-cors" });
             if (!response.ok) {
                 throw new Error(`Failed to download APK: ${response.statusText}`);
             }
