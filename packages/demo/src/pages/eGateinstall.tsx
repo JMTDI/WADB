@@ -105,62 +105,84 @@ class InstallPageState {
                 this.installing = true;
             });
             
-            // Try multiple CORS proxy services in order
-            const corsProxies = [
-                'https://api.allorigins.win/raw?url=',
-                'https://cors-anywhere.herokuapp.com/',
-                'https://thingproxy.freeboard.io/fetch/',
-                'https://api.codetabs.com/v1/proxy?quest='
+            // Try multiple approaches in order
+            const downloadMethods = [
+                // Method 1: Direct download
+                async () => {
+                    runInAction(() => { this.log += `Trying direct download...\n`; });
+                    const response = await fetch(directUrl, { mode: 'cors' });
+                    if (!response.ok) throw new Error(`Direct: ${response.status}`);
+                    return response;
+                },
+                
+                // Method 2: Updated CORS proxies (2025)
+                async () => {
+                    const proxies = [
+                        'https://corsproxy.io/?',
+                        'https://cors.sh/',
+                        'https://api.allorigins.win/raw?url=',
+                        'https://cors-anywhere.herokuapp.com/',
+                        'https://thingproxy.freeboard.io/fetch/'
+                    ];
+                    
+                    for (const proxy of proxies) {
+                        try {
+                            runInAction(() => { this.log += `Trying proxy: ${proxy}\n`; });
+                            const proxyUrl = proxy + encodeURIComponent(directUrl);
+                            const response = await fetch(proxyUrl, {
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                                    'Accept': 'application/vnd.android.package-archive,application/octet-stream,*/*'
+                                }
+                            });
+                            if (response.ok) {
+                                runInAction(() => { this.log += `Proxy successful: ${proxy}\n`; });
+                                return response;
+                            }
+                        } catch (proxyError) {
+                            runInAction(() => { this.log += `Proxy failed: ${proxy} - ${(proxyError as Error).message}\n`; });
+                        }
+                    }
+                    throw new Error('All proxies failed');
+                },
+                
+                // Method 3: Alternative GitHub approach (jsdelivr CDN)
+                async () => {
+                    runInAction(() => { this.log += `Trying jsdelivr CDN...\n`; });
+                    const cdnUrl = directUrl.replace(
+                        'https://github.com/offlinesoftwaresolutions/eGate/releases/latest/download/',
+                        'https://cdn.jsdelivr.net/gh/offlinesoftwaresolutions/eGate@latest/'
+                    );
+                    const response = await fetch(cdnUrl);
+                    if (!response.ok) throw new Error(`CDN: ${response.status}`);
+                    return response;
+                },
+                
+                // Method 4: Manual user intervention
+                async () => {
+                    runInAction(() => { 
+                        this.log += `All automated methods failed. Please:\n`;
+                        this.log += `1. Open: ${directUrl}\n`;
+                        this.log += `2. Save the APK file\n`;
+                        this.log += `3. Use the file upload feature (if available)\n`;
+                    });
+                    throw new Error('Manual download required');
+                }
             ];
             
             let response: Response | null = null;
             let lastError: Error | null = null;
             
-            // Try direct download first (might work in some environments)
-            try {
-                response = await fetch(directUrl);
-                if (response.ok) {
-                    runInAction(() => {
-                        this.log += `Direct download successful\n`;
-                    });
-                } else {
-                    throw new Error(`Direct download failed: ${response.status}`);
-                }
-            } catch (directError) {
-                runInAction(() => {
-                    this.log += `Direct download failed, trying CORS proxies...\n`;
-                });
-                
-                // Try each CORS proxy
-                for (const proxy of corsProxies) {
-                    try {
-                        const proxyUrl = proxy + encodeURIComponent(directUrl);
-                        runInAction(() => {
-                            this.log += `Trying proxy: ${proxy}\n`;
-                        });
-                        
-                        response = await fetch(proxyUrl, {
-                            headers: {
-                                'X-Requested-With': 'XMLHttpRequest',
-                                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-                            }
-                        });
-                        
-                        if (response.ok) {
-                            runInAction(() => {
-                                this.log += `Proxy successful: ${proxy}\n`;
-                            });
-                            break;
-                        } else {
-                            throw new Error(`Proxy failed: ${response.status}`);
-                        }
-                    } catch (proxyError) {
-                        lastError = proxyError as Error;
-                        runInAction(() => {
-                            this.log += `Proxy failed: ${proxy} - ${lastError?.message}\n`;
-                        });
-                        response = null;
+            // Try each method in order
+            for (const method of downloadMethods) {
+                try {
+                    response = await method();
+                    if (response && response.ok) {
+                        break;
                     }
+                } catch (error) {
+                    lastError = error as Error;
                 }
             }
             
@@ -172,6 +194,15 @@ class InstallPageState {
             
             if (blob.size === 0) {
                 throw new Error("Downloaded file is empty");
+            }
+            
+            // Check if it's actually an APK file
+            const contentType = response.headers.get('content-type');
+            if (contentType && !contentType.includes('application/vnd.android.package-archive') && 
+                !contentType.includes('application/octet-stream') && blob.size < 1000000) {
+                runInAction(() => {
+                    this.log += `Warning: Downloaded file may not be an APK (${contentType}, ${blob.size} bytes)\n`;
+                });
             }
             
         } catch (error: any) {
