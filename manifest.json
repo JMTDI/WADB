@@ -6,8 +6,8 @@
         "developer"
     ],
     "description": "ADB in your browser",
-    "scope": "/old-demo/",
-    "start_url": "/old-demo/",
+    "scope": "/WADB/",
+    "start_url": "/WADB/",
     "background_color": "#ffffff",
     "display": "standalone",
     "icons": [
