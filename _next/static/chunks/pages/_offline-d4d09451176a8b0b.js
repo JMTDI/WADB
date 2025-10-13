@@ -1,2 +1,0 @@
-(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[95],{2865:function(n,u,e){(window.__NEXT_P=window.__NEXT_P||[]).push(["/_offline",function(){return e(6241)}])},6241:function(n,u,e){"use strict";e.r(u),e.d(u,{default:function(){return r}});var t=e(4527),f=e.n(t),c=e(8425);function r(){return(0,c.useEffect)(()=>{f().replace(location.href)},[]),null}}},function(n){n.O(0,[774,888,179],function(){return n(n.s=2865)}),_N_E=n.O()}]);
-//# sourceMappingURL=_offline-d4d09451176a8b0b.js.map
