@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "APK proxy service",
   "type": "module",
-  "main": "index.js",
+  "main": "proxy.js",
   "scripts": {
     "start": "node proxy.js",
     "build": "echo 'No build step.'"
