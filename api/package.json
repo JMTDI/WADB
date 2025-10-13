@@ -2,6 +2,7 @@
   "name": "apk-proxy",
   "version": "1.0.0",
   "description": "APK proxy service",
+  "type": "module",
   "main": "proxy.js",
   "scripts": {
     "start": "node proxy.js",
