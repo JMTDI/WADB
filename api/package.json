@@ -2,7 +2,7 @@
   "name": "apk-proxy",
   "version": "1.0.0",
   "description": "APK proxy service",
-  "main": "index.js",
+  "main": "proxy.js",
   "scripts": {
     "dev": "vercel dev",
     "build": "vercel build"
