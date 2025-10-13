@@ -4,6 +4,8 @@ import fetch from "node-fetch";
 const app = express();
 const port = process.env.PORT || 3000;
 
+console.log("ENV PORT:", process.env.PORT);
+
 app.options("/proxy", (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
