@@ -2,7 +2,7 @@ import express from "express";
 import fetch from "node-fetch";
 
 const app = express();
-const port = process.env.PORT || 8000;
+const port = process.env.PORT;
 
 console.log("ENV PORT:", process.env.PORT);
 
