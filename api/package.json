@@ -4,5 +4,9 @@
   "description": "APK proxy service",
   "type": "module",
   "main": "proxy.js",
+  "scripts": {
+    "start": "node proxy.js",
+    "build": "echo 'No build step.'"
+  },
   "dependencies": {}
 }
