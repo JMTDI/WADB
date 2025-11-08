@@ -1,10 +1,14 @@
 {
-  "name": "static-site",
+  "name": "wadb-site",
   "version": "1.0.0",
+  "type": "module",
   "scripts": {
-    "start": "npx serve -s ."
+    "dev": "node server.js",
+    "start": "NODE_ENV=production node server.js"
   },
   "dependencies": {
-    "serve": "^14.2.0"
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "node-fetch": "^3.3.2"
   }
 }
