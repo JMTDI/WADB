@@ -1,15 +1,15 @@
 {
-  "name": "wadb-site",
+  "name": "apk-proxy",
   "version": "1.0.0",
+  "description": "WADB static site + APK proxy",
   "type": "module",
+  "main": "proxy.js",
   "scripts": {
-    "dev": "node server.js",
-    "start": "NODE_ENV=production node server.js",
-    "build": "echo 'No build step.'"
+    "start": "node proxy.js",
+    "build": "echo \"No build step required\""
   },
   "dependencies": {
     "express": "^4.18.2",
-    "cors": "^2.8.5",
     "node-fetch": "^3.3.2"
   }
 }
