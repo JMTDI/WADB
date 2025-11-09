@@ -1,10 +1,31 @@
 import express from "express";
 import fetch from "node-fetch";
+import fs from "fs";
+import path from "path";
 
 const app = express();
 const port = process.env.PORT || 8000;
 
 console.log("ENV PORT:", process.env.PORT);
+
+// Middleware to rewrite URLs - add .html if needed (like GitHub Pages)
+app.use((req, res, next) => {
+  // Skip if it's the proxy endpoint, health check, or already has an extension
+  if (req.path === '/proxy' || req.path === '/health' || req.path.includes('.')) {
+    return next();
+  }
+  
+  // If path doesn't end with .html, try to serve the .html version
+  if (!req.path.endsWith('.html') && !req.path.endsWith('/')) {
+    const htmlPath = req.path + '.html';
+    
+    if (fs.existsSync(path.join('.', htmlPath))) {
+      req.url = htmlPath;
+    }
+  }
+  
+  next();
+});
 
 // Serve static files (all your gh-pages HTML, CSS, JS, assets at repo root)
 app.use(express.static('.'));
