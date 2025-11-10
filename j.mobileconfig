@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>PayloadContent</key>
+	<array>
+		<dict>
+			<key>PayloadDescription</key>
+			<string>Global Proxy Configuration</string>
+			<key>PayloadDisplayName</key>
+			<string>Global Proxy Settings</string>
+			<key>PayloadIdentifier</key>
+			<string>com.organization.globalproxy.A1B2C3D4-E5F6-7890-ABCD-EF1234567890</string>
+			<key>PayloadType</key>
+			<string>com.apple.proxyglobal</string>
+			<key>PayloadUUID</key>
+			<string>A1B2C3D4-E5F6-7890-ABCD-EF1234567890</string>
+			<key>PayloadVersion</key>
+			<integer>1</integer>
+			<key>ProxyCaptiveLoginAllowed</key>
+			<true/>
+			<key>ProxyPACFallbackAllowed</key>
+			<false/>
+			<key>ProxyType</key>
+			<string>Manual</string>
+			<key>ProxyServer</key>
+			<string>192.168.7.10</string>
+			<key>ProxyServerPort</key>
+			<integer>8080</integer>
+			<key>ProxyHTTPEnable</key>
+			<true/>
+			<key>ProxyHTTPSEnable</key>
+			<true/>
+		</dict>
+	</array>
+	<key>PayloadDescription</key>
+	<string>Global proxy configuration for network traffic</string>
+	<key>PayloadDisplayName</key>
+	<string>Global Proxy Profile</string>
+	<key>PayloadIdentifier</key>
+	<string>com.organization.globalproxy.main</string>
+	<key>PayloadRemovalDisallowed</key>
+	<false/>
+	<key>PayloadType</key>
+	<string>Configuration</string>
+	<key>PayloadUUID</key>
+	<string>B2C3D4E5-F6G7-8901-BCDE-F23456789012</string>
+	<key>PayloadVersion</key>
+	<integer>1</integer>
+	<key>PayloadOrganization</key>
+	<string>Organization IT Department</string>
+</dict>
+</plist>
